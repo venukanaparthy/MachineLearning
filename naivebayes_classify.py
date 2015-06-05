@@ -1,11 +1,17 @@
 import sys
+import time
 import pandas as pd
 import numpy as np
 from sklearn.cross_validation import train_test_split
 from sklearn.naive_bayes import GaussianNB
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import confusion_matrix
 
-def classify():
+import matplotlib.pyplot as plt
+
+def classifyNB():
     print 'Classify..'
+    target_names = ['unacc', 'acc','good','v-good']
     df = pd.read_csv("data/cars-cleaned.txt", delimiter=",");    
     print df
     print df.dtypes
@@ -15,18 +21,26 @@ def classify():
     #print df_y
     #print df_x
     train_y, test_y, train_x, test_x = train_test_split(df_y, df_x, test_size = 0.3, random_state=33)
-    print len(train_y)
-    print len(train_x)
-    print '--------------------'
-    print len(test_y)    
-    print len(test_x)
     
     clf = GaussianNB()
+    tstart=time.time()
     model = clf.fit(train_x, train_y)
-    predictions = model.predict(test_x)
+    print "training time:", round(time.time()-tstart, 3), "seconds"
+    y_predictions = model.predict(test_x)
     print "Accuracy : " , model.score(test_x, test_y)
-    print "predictions---------------"
-    print len(predictions==test_y)/len(predictions)
+    #print y_predictions
+    c_matrix = confusion_matrix(test_y,y_predictions)
+    print "confusion matrix:"
+    print c_matrix
     
+    plt.matshow(c_matrix)
+    plt.colorbar();
+    tick_marks = np.arange(len(target_names))
+    plt.xticks(tick_marks, target_names, rotation=45)
+    plt.yticks(tick_marks, target_names)    
+    plt.ylabel('true label')
+    plt.xlabel('predicted label')
+    plt.show()
+        
 if __name__ == "__main__":
-     classify()
+     classifyNB()
